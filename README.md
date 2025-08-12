@@ -27,7 +27,25 @@ See the `VERSION` file for the latest release version.
 
 ## 🚀 Quick Start
 
-### Option 1: Docker Deployment
+### Option 1: One-Click Startup (Recommended for Local Development)
+
+**Windows Batch Script:**
+```cmd
+start_all.bat
+```
+
+**Windows PowerShell Script (with health checks):**
+```powershell
+.\start_all.ps1
+```
+
+Both scripts will:
+- Check for Python and Node.js prerequisites
+- Start the FastAPI backend on http://localhost:8000
+- Start the React frontend on http://localhost:5173
+- Provide status updates and health checks
+
+### Option 2: Docker Deployment
 
 1. **Clone and configure**:
    ```bash
@@ -52,7 +70,7 @@ See the `VERSION` file for the latest release version.
    docker compose down -v
    ```
 
-### Option 2: Local Development (No Docker)
+### Option 3: Manual Local Development (Advanced)
 
 #### Backend Setup
 
