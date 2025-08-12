@@ -307,8 +307,9 @@ docker compose logs -f backend
 
 - [Backend Guide](backend/README.md): Detailed backend development documentation
 - [Frontend Guide](frontend/README.md): Frontend development and deployment guide
-- [API Documentation](http://localhost:8000/api/docs): Interactive API docs (available when backend is running locally)
 - [Examples](examples/README.md): Sample policy files for testing import functionality
+
+**API Documentation:** Interactive API docs are available at `http://localhost:8000/api/docs` when the backend server is running locally.
 
 ## 📝 License
 
