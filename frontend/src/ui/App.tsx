@@ -167,15 +167,28 @@ function Dashboard({ session }: { session: any }) {
     try {
       const fd = new FormData(); fd.append('file', pdf)
       const response = await fetch(`${apiBase}/policies/import/pdf`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd })
-      const result = await response.json()
-      if (!response.ok) {
-        throw new Error(result.detail || 'Upload failed')
+      
+      // Check if response has content before trying to parse JSON
+      const text = await response.text()
+      let result
+      
+      try {
+        result = text ? JSON.parse(text) : {}
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError, 'Response text:', text)
+        throw new Error('Invalid response from server')
       }
+      
+      if (!response.ok) {
+        throw new Error(result.detail || `Server error: ${response.status}`)
+      }
+      
       await refresh()
       setUploadStatus(`PDF imported successfully! Created policy ID: ${result.created_id}`)
       setPdf(null)
       setTimeout(() => setUploadStatus(''), 5000)
     } catch (error) {
+      console.error('Import PDF error:', error)
       setUploadStatus(`Error: ${error}`)
       setTimeout(() => setUploadStatus(''), 5000)
     }
