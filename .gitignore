@@ -6,3 +6,48 @@ node_modules/
 
 # Ignore all .env files
 *.env
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+*.logs
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Package files
+package-lock.json
+*.egg-info/
+dist/
+build/
+
+# Environment and virtual environment
+.env
+.venv/
+env/
+venv/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
