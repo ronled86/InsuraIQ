@@ -6,6 +6,29 @@ A modern insurance policy management platform built with FastAPI (backend) and R
 **Current Version:** v1.0.0  
 See the `VERSION` file for the latest release version.
 
+## 📈 Recent Updates (v1.0.0)
+
+### ✅ **PDF Import Functionality - FULLY OPERATIONAL**
+- **Fixed**: 500 Internal Server Error during PDF uploads
+- **Fixed**: Connection reset issues in frontend
+- **Fixed**: FileNotFoundError with Unix paths on Windows systems
+- **Added**: Comprehensive error logging and debugging
+- **Added**: Robust fallback handling for unreadable PDFs
+- **Added**: Enhanced regex patterns for policy data extraction
+- **Improved**: File handling with Windows-compatible temporary file paths
+
+### 🔧 **System Improvements**
+- **Added**: Comprehensive startup scripts (`start_all.bat`, `start_all.ps1`)
+- **Added**: PowerShell execution policy bypass for seamless startup
+- **Improved**: Documentation with troubleshooting guides
+- **Enhanced**: Backend stability and error handling
+
+### 🚀 **Ready for Production**
+- All API endpoints tested and working
+- PDF import tested with real insurance documents
+- Frontend and backend integration verified
+- Database operations confirmed stable
+
 
 ## 🏗️ Architecture
 
@@ -130,10 +153,17 @@ psycopg2-binary==2.9.9        # PostgreSQL adapter (production)
 
 #### Optional Dependencies
 ```
-pdfminer.six==20240706        # PDF text extraction
+pdfminer.six==20240706        # PDF text extraction (✅ **Working**)
 pytesseract==0.3.13           # OCR (requires Tesseract binary)
-Pillow==10.4.0                # Image processing
+Pillow==10.4.0                # Image processing for OCR
 ```
+
+**PDF Import Features:**
+- ✅ Automatic text extraction from PDF files
+- ✅ Pattern-based data extraction for policy information
+- ✅ Fallback data handling for unreadable PDFs
+- ✅ OCR support (when Tesseract is installed)
+- ✅ Robust error handling and logging
 
 #### Local Development (requirements-local.txt)
 Lightweight subset excluding:
@@ -248,8 +278,8 @@ SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/insuranc
 - `POST /api/policies/` - Create policy
 - `PUT /api/policies/{id}` - Update policy
 - `DELETE /api/policies/{id}` - Delete policy
-- `POST /api/policies/upload` - Upload CSV
-- `POST /api/policies/import/pdf` - Import from PDF
+- `POST /api/policies/upload` - Upload CSV files
+- `POST /api/policies/import/pdf` - Import policy data from PDF files (✅ **Working**)
 
 ### Advisory
 - `POST /api/advisor/compare` - Compare policies
@@ -287,6 +317,14 @@ SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/insuranc
 ## 🛠️ Troubleshooting
 
 ### Common Issues
+
+#### PDF Import Issues (✅ **Resolved**)
+- **✅ Fixed**: 500 Internal Server Error during PDF upload
+- **✅ Fixed**: Connection reset errors in frontend
+- **✅ Fixed**: FileNotFoundError with Unix paths on Windows
+- **Solution**: Enhanced file handling with proper Windows temporary file paths
+- **Solution**: Improved error handling with graceful fallbacks
+- **Solution**: Added comprehensive logging for debugging
 
 #### Backend won't start
 - **Dependency errors**: Use `requirements-local.txt` for simpler local setup
