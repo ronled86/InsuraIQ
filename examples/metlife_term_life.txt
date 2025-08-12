@@ -1,0 +1,40 @@
+METLIFE TERM LIFE INSURANCE
+POLICY CERTIFICATE
+
+Insured: Sarah Chen
+Policy Number: ML-TERM-2024-334455
+Beneficiary: David Chen (Spouse)
+Contingent Beneficiary: Emma Chen (Daughter)
+
+POLICY DETAILS:
+Issue Date: February 15, 2024
+Policy Anniversary: February 15
+Product Type: Life Insurance
+Term Length: 20 Years
+Premium: $95.00 (Monthly)
+Death Benefit: $500,000.00
+
+COVERAGE INFORMATION:
+Coverage Type: Level Term Life Insurance
+Premium Guarantee Period: 20 years
+Renewable: Yes, until age 75
+Convertible: Yes, until age 65
+
+UNDERWRITING DETAILS:
+Health Class: Preferred Plus Non-Smoker
+Medical Exam: Completed January 28, 2024
+Height: 5'6"
+Weight: 140 lbs
+Build: Standard
+
+OPTIONAL RIDERS:
+- Accelerated Death Benefit Rider: Included
+- Waiver of Premium Rider: $12.00/month
+- Child Term Rider: $8.00/month (2 children)
+
+PREMIUM PAYMENT:
+Mode: Monthly Electronic Funds Transfer
+Due Date: 15th of each month
+Grace Period: 31 days
+
+This policy is issued by Metropolitan Life Insurance Company and is subject to all terms and conditions of the policy contract.

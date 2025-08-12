@@ -1,0 +1,44 @@
+LEMONADE INSURANCE COMPANY
+RENTERS INSURANCE POLICY
+
+Policy Holder: Emma Thompson
+Email: emma.thompson@email.com
+Policy Number: LEM-NYC-2024-789456
+Address: 456 Broadway Apt 12B, New York, NY 10013
+
+COVERAGE PERIOD:
+Policy Start: June 1, 2024
+Policy End: May 31, 2025
+Product Type: Renters Insurance
+
+MONTHLY PREMIUM: $32.00
+ANNUAL DEDUCTIBLE: $250.00
+COVERAGE LIMIT: $35,000.00
+
+COVERAGE BREAKDOWN:
+Personal Property: $30,000
+- Electronics: $8,000
+- Jewelry: $2,500
+- Clothing: $5,000
+- Furniture: $10,000
+- Other Items: $4,500
+
+Liability Protection: $100,000
+Medical Payments: $1,000
+Loss of Use: $6,000
+
+SPECIAL FEATURES:
+✓ Instant Claims via App
+✓ AI-Powered Claims Processing
+✓ Zero Paperwork
+✓ Giveback Program (unused premiums donated)
+✓ Worldwide Coverage for Personal Items
+
+BUILDING INFORMATION:
+Type: High-rise apartment building
+Year Built: 1985
+Doorman: Yes
+Security System: Yes
+Sprinkler System: Yes
+
+This policy is underwritten by Lemonade Insurance Company and provides coverage for your personal belongings and liability protection.

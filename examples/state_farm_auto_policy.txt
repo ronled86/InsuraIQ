@@ -1,0 +1,33 @@
+STATE FARM INSURANCE COMPANY
+AUTOMOBILE INSURANCE POLICY
+
+Policy Holder: Michael Thompson
+Policy Number: SF-AUTO-2024-567890
+Agent: Rebecca Miller
+Phone: (555) 123-4567
+
+POLICY DETAILS:
+Policy Effective Date: January 1, 2024
+Policy Expiration Date: December 31, 2024
+Product Type: Auto Insurance
+Premium Amount: $225.00 (Monthly)
+Deductible: $500.00
+Coverage Limit: $100,000
+
+VEHICLE INFORMATION:
+2021 Honda Accord Sedan
+VIN: 1HGCV1F30MA123456
+
+COVERAGE DETAILS:
+- Bodily Injury Liability: $50,000/$100,000
+- Property Damage Liability: $50,000
+- Comprehensive Coverage: $500 deductible
+- Collision Coverage: $500 deductible
+- Uninsured Motorist: $50,000/$100,000
+
+DISCOUNTS APPLIED:
+- Good Driver Discount: 15%
+- Multi-Policy Discount: 10%
+- Good Student Discount: 5%
+
+This policy is subject to all terms and conditions outlined in the State Farm policy agreement.

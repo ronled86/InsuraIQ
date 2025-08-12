@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=insurance
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d insurance"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - API_ISSUER=${API_ISSUER}
+      - API_AUDIENCE=${API_AUDIENCE}
+      - RATE_LIMIT_PER_MINUTE=240
+      - BASE_PATH=/api
+      - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/insurance
+      - INSURER_API_BASE=${INSURER_API_BASE}
+      - INSURER_API_KEY=${INSURER_API_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/openapi.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  frontend:
+    build: ./frontend
+    volumes:
+      - frontend_build:/frontend-out
+
+  caddy:
+    image: caddy:2.8
+    depends_on:
+      - backend
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - frontend_build:/srv/www:ro
+
+volumes:
+  db_data:
+  frontend_build:

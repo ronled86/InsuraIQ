@@ -1,0 +1,39 @@
+PROGRESSIVE INSURANCE COMPANY
+COMMERCIAL AUTO POLICY
+
+Business Name: Rodriguez Delivery Services LLC
+Policy Holder: Carlos Rodriguez
+Policy Number: PROG-COM-2024-001122
+Federal Tax ID: 12-3456789
+
+POLICY TERM:
+Effective Date: April 1, 2024
+Expiration Date: March 31, 2025
+Product Type: Commercial Auto Insurance
+
+PREMIUM DETAILS:
+Monthly Premium: $895.00
+Annual Premium: $10,740.00
+Deductible: $1,000.00
+Coverage Limit: $1,000,000.00
+
+FLEET INFORMATION:
+Vehicle 1: 2022 Ford Transit Van - VIN: 1FTBW2CM6NKA12345
+Vehicle 2: 2021 Chevrolet Express - VIN: 1GCWGAFG8M1234567
+Vehicle 3: 2020 Isuzu NPR Box Truck - VIN: JALC4B16XL7123456
+
+COVERAGE DETAILS:
+- Bodily Injury Liability: $1,000,000 each occurrence
+- Property Damage Liability: $1,000,000 each occurrence
+- Comprehensive Coverage: $1,000 deductible
+- Collision Coverage: $1,000 deductible
+- Uninsured/Underinsured Motorist: $1,000,000
+- Medical Payments: $10,000 per person
+- Cargo Coverage: $50,000
+
+BUSINESS USE:
+Local and long-distance delivery services
+Operating radius: 500 miles
+Drivers: 5 employees (all MVR approved)
+
+This policy covers commercial vehicle operations subject to Progressive's commercial auto policy terms.

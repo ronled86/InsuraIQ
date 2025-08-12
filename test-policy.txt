@@ -1,0 +1,13 @@
+Test Insurance Policy Document
+
+Policy Holder: John Smith
+Policy Number: ABC123456
+Insurer: Test Insurance Company
+Product Type: Auto Insurance
+Premium: $150 monthly
+Deductible: $500
+Coverage Limit: $100,000
+Start Date: 2024-01-01
+End Date: 2024-12-31
+
+This is a test policy document to verify PDF import functionality.

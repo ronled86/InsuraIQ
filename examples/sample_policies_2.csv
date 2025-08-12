@@ -1,0 +1,6 @@
+insurer,product_type,premium_monthly,deductible,coverage_limit,owner_name,policy_number,start_date,end_date,notes,active
+Blue Cross Blue Shield,Health Insurance,450.00,2500,1000000,Jennifer Wilson,BCBS-2024-789012,2024-01-01,2024-12-31,Individual health plan with dental,true
+Aetna,Health Insurance,520.75,1500,2000000,Robert Taylor,AETNA-FAM-001,2024-02-15,2025-02-14,Family health insurance plan,true
+MetLife,Life Insurance,85.00,0,500000,Jennifer Wilson,ML-LIFE-456789,2024-01-01,2034-01-01,20-year term life insurance,true
+Prudential,Life Insurance,125.50,0,750000,Robert Taylor,PRUD-TERM-2024,2024-03-01,2034-03-01,Term life with disability rider,true
+Travelers,Business Insurance,380.00,2500,500000,Wilson Consulting LLC,TRAV-BIZ-2024-001,2024-01-01,2024-12-31,General liability for small business,true

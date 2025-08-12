@@ -1,0 +1,39 @@
+BLUE CROSS BLUE SHIELD
+HEALTH INSURANCE CERTIFICATE
+
+Member: Dr. James Patterson
+Member ID: BCBS-2024-456789
+Group Number: 12345
+Plan: BlueCare PPO Plus
+
+COVERAGE PERIOD:
+Start Date: January 1, 2024
+End Date: December 31, 2024
+Product Type: Health Insurance
+
+FINANCIAL DETAILS:
+Monthly Premium: $485.00
+Annual Deductible: $2,000.00
+Out-of-Pocket Maximum: $8,000.00
+Coverage Limit: $2,000,000.00
+
+BENEFIT SUMMARY:
+- Office Visits: $25 copay
+- Specialist Visits: $45 copay
+- Emergency Room: $150 copay (waived if admitted)
+- Urgent Care: $35 copay
+- Generic Prescriptions: $10 copay
+- Brand Name Prescriptions: $30 copay
+- Preventive Care: 100% covered
+
+NETWORK BENEFITS:
+In-Network: 80% after deductible
+Out-of-Network: 60% after deductible
+
+DENTAL COVERAGE INCLUDED:
+- Cleanings: 100% covered (2x per year)
+- Basic Procedures: 80% covered
+- Major Procedures: 50% covered
+- Annual Dental Maximum: $1,500
+
+This certificate is evidence of coverage under the Blue Cross Blue Shield health insurance plan.

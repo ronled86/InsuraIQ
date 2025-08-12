@@ -1,0 +1,6 @@
+insurer,product_type,premium_monthly,deductible,coverage_limit,owner_name,policy_number,start_date,end_date,notes,active
+Nationwide,Motorcycle Insurance,89.25,500,50000,David Rodriguez,NW-MOTO-2024-001,2024-04-01,2025-03-31,Harley Davidson coverage,true
+USAA,Umbrella Insurance,65.00,0,1000000,Maria Garcia,USAA-UMB-789456,2024-01-01,2024-12-31,Personal umbrella policy,true
+Farmers Insurance,Boat Insurance,145.50,1000,75000,David Rodriguez,FARM-BOAT-2024,2024-05-01,2025-04-30,Yacht club member discount,true
+Hartford,Pet Insurance,35.75,200,10000,Lisa Chen,HART-PET-001234,2024-03-15,2025-03-14,Coverage for Golden Retriever,true
+Chubb,Jewelry Insurance,25.00,250,25000,Maria Garcia,CHUBB-JEW-2024,2024-02-01,2025-01-31,Wedding ring and watch coverage,true

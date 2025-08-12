@@ -1,0 +1,39 @@
+ALLSTATE HOMEOWNERS INSURANCE
+DECLARATION PAGE
+
+Insured: Amanda Rodriguez
+Policy Number: ALL-HOME-2024-789123
+Address: 1234 Maple Street, Springfield, IL 62704
+
+POLICY PERIOD:
+Effective Date: March 1, 2024
+Expiration Date: February 28, 2025
+Product Type: Home Insurance
+
+PREMIUM INFORMATION:
+Annual Premium: $1,680.00
+Monthly Premium: $140.00
+Deductible: $1,500.00
+Total Coverage Limit: $350,000.00
+
+COVERAGE SUMMARY:
+- Dwelling Coverage (A): $250,000
+- Other Structures (B): $25,000
+- Personal Property (C): $175,000
+- Loss of Use (D): $50,000
+- Personal Liability: $300,000
+- Medical Payments: $5,000
+
+PROPERTY DETAILS:
+Single Family Home - 2,450 sq ft
+Built: 1995
+Construction: Frame/Brick
+Roof: Architectural Shingles
+Heating: Gas Forced Air
+
+DISCOUNTS:
+- Claim-Free Discount: 20%
+- Home Security System: 5%
+- Non-Smoker: 2%
+
+This policy provides coverage subject to the terms, conditions, and exclusions of the Allstate Homeowners policy form.

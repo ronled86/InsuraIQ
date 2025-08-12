@@ -1,0 +1,6 @@
+insurer,product_type,premium_monthly,deductible,coverage_limit,owner_name,policy_number,start_date,end_date,notes,active
+Tesla Insurance,Auto Insurance,195.00,1000,250000,Alex Kim,TESLA-2024-001,2024-06-01,2025-05-31,Model 3 Performance coverage,true
+Root Insurance,Auto Insurance,145.75,500,100000,Jordan Lee,ROOT-SAFE-2024,2024-07-15,2025-07-14,Usage-based insurance with safe driving discount,true
+Lemonade,Renters Insurance,25.00,250,30000,Taylor Swift,LEM-RENT-NYC-001,2024-08-01,2025-07-31,NYC apartment coverage with electronics,true
+Hippo Insurance,Home Insurance,165.00,2500,400000,Morgan Davis,HIPPO-SMART-2024,2024-05-01,2025-04-30,Smart home technology discounts,true
+Next Insurance,Business Insurance,125.00,1000,300000,Garcia Photography,NEXT-PHOTO-2024,2024-04-01,2025-03-31,Professional photographer liability,true
