@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
 const supabaseAnon = import.meta.env.VITE_SUPABASE_ANON_KEY as string
-const apiBase = import.meta.env.VITE_API_BASE as string
+const apiBase = import.meta.env.VITE_API_BASE || '/api'
 const isLocalDev = import.meta.env.VITE_LOCAL_DEV === 'true'
 
 const supabase = supabaseUrl && supabaseAnon ? createClient(supabaseUrl, supabaseAnon) : null
@@ -627,7 +627,7 @@ function EditableRow({ p, onSave, onDelete, onSelect }: { p: Policy, onSave: (p:
 }
 
 function History({ token }:{ token: string }) {
-  const apiBase = import.meta.env.VITE_API_BASE as string
+  const apiBase = import.meta.env.VITE_API_BASE || '/api'
   const [items, setItems] = useState<any[]>([])
   useEffect(()=>{
     fetch(`${apiBase}/advisor/compare_history`, { headers: { Authorization: `Bearer ${token}`}})
