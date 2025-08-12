@@ -1,5 +1,5 @@
 @echo off
-REM InsuraIQ - Start Backend and Frontend
+REM InsuraIQ - Start Backend and Frontend (Batch-only version)
 
 echo =============================================
 echo Starting InsuraIQ - Insurance Management Platform
@@ -26,12 +26,12 @@ if %errorlevel% neq 0 (
 echo Prerequisites check passed!
 echo.
 
-REM Start backend in a new terminal window
+REM Start backend using direct Python commands
 echo Starting FastAPI backend server...
-start "InsuraIQ Backend (FastAPI)" cmd /k "cd /d %~dp0backend && echo Starting FastAPI backend... && powershell -ExecutionPolicy Bypass -NoExit -Command .\run_local_dev.ps1"
+start "InsuraIQ Backend (FastAPI)" cmd /k "cd /d %~dp0backend && echo Starting FastAPI backend... && python -m venv .venv && .venv\Scripts\activate && pip install -r requirements-local.txt && python -c \"from app.database import Base, engine; from app import models; Base.metadata.create_all(bind=engine)\" && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
 REM Wait a moment for backend to start
-timeout /t 3 /nobreak >nul
+timeout /t 5 /nobreak >nul
 
 REM Start frontend in a new terminal window
 echo Starting React frontend...

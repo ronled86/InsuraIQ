@@ -32,7 +32,7 @@ Write-Host ""
 # Start backend in a new PowerShell window
 Write-Host "Starting FastAPI backend server..." -ForegroundColor Yellow
 $backendPath = Join-Path $PSScriptRoot "backend"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$backendPath'; Write-Host 'Starting FastAPI backend...' -ForegroundColor Cyan; .\run_local_dev.ps1" -WindowStyle Normal
+Start-Process powershell -ArgumentList "-ExecutionPolicy", "Bypass", "-NoExit", "-Command", "cd '$backendPath'; Write-Host 'Starting FastAPI backend...' -ForegroundColor Cyan; .\run_local_dev.ps1" -WindowStyle Normal
 
 # Wait a moment for backend to start
 Write-Host "Waiting for backend to initialize..." -ForegroundColor Yellow
