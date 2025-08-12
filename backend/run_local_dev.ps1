@@ -32,4 +32,5 @@ if ($usingSQLite -and (Test-Path requirements-local.txt)) {
 if ($usingSQLite) { pwsh -NoLogo -File scripts/Init-SQLite.ps1 }
 
 Write-Host "Starting Uvicorn (logs will also go to backend-dev.log)" -ForegroundColor Green
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 2>&1 | Tee-Object -FilePath backend-dev.log
+$env:PYTHONUNBUFFERED = "1"
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload *>&1 | Tee-Object -FilePath backend-dev.log
