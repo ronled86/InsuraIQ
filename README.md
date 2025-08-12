@@ -2,6 +2,11 @@
 
 A modern insurance policy management platform built with FastAPI (backend) and React (frontend), designed to help users manage their insurance policies, compare coverage, and get recommendations.
 
+---
+**Current Version:** v1.0.0  
+See the `VERSION` file for the latest release version.
+
+
 ## 🏗️ Architecture
 
 - **Backend**: FastAPI with SQLAlchemy, PostgreSQL/SQLite
@@ -297,13 +302,14 @@ docker compose logs caddy
 docker compose logs -f backend
 ```
 
-## � Documentation
 
-- **[Backend Guide](backend/README.md)**: Detailed backend development documentation
-- **[Frontend Guide](frontend/README.md)**: Frontend development and deployment guide
-- **[API Documentation](http://localhost:8000/api/docs)**: Interactive API docs (when running)
+## 📚 Documentation
 
-## �📝 License
+- [Backend Guide](backend/README.md): Detailed backend development documentation
+- [Frontend Guide](frontend/README.md): Frontend development and deployment guide
+- [API Documentation](http://localhost:8000/api/docs): Interactive API docs (when running)
+
+## 📝 License
 
 See [LICENSE](LICENSE) file for details.
 
