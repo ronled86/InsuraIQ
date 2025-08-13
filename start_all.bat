@@ -82,16 +82,16 @@ REM =============================================
 REM START NEW PROCESSES
 REM =============================================
 
-REM Start backend in a new terminal window
-echo Starting FastAPI backend server...
-start "InsuraIQ Backend (FastAPI)" cmd /k "cd /d %~dp0backend && echo Starting FastAPI backend... && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload --no-use-colors"
+REM Start backend with full setup in a new terminal window
+echo Starting FastAPI backend server with setup...
+start "InsuraIQ Backend (FastAPI)" cmd /k "cd /d %~dp0backend && echo Setting up and starting FastAPI backend... && python -m venv .venv && .venv\Scripts\activate && pip install -r requirements-local.txt && python init_db.py && echo Backend setup complete, starting server... && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
 REM Wait a moment for backend to start
-timeout /t 3 /nobreak >nul
+timeout /t 5 /nobreak >nul
 
-REM Start frontend in a new terminal window
-echo Starting React frontend...
-start "InsuraIQ Frontend (React)" cmd /k "cd /d %~dp0frontend && echo Installing dependencies and starting React... && npm install && npm run dev"
+REM Start frontend with dependency installation in a new terminal window
+echo Starting React frontend with setup...
+start "InsuraIQ Frontend (React)" cmd /k "cd /d %~dp0frontend && echo Installing dependencies and starting React... && npm install && echo Frontend setup complete, starting development server... && npm run dev"
 
 echo.
 echo =============================================
