@@ -54,3 +54,13 @@ venv/
 
 # Example files
 *.pdf
+
+# Test files and temporary scripts
+test_*.py
+*_test.py
+analyze_*.py
+check_*.py
+fix_*.py
+test_*.bat
+*_IMPLEMENTATION.md
+README_V*.md
