@@ -59,6 +59,7 @@ venv/
 test_*.py
 *_test.py
 analyze_*.py
+!analyze_hebrew_doc.py
 check_*.py
 fix_*.py
 test_*.bat

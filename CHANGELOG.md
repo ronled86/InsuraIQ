@@ -5,6 +5,26 @@ All notable changes to the InsuraIQ project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-08-13 - **🔍 Hebrew Analysis Enhancement**
+
+### 🇮🇱 **Hebrew Document Analysis**
+- **Hebrew Insurance Document Analyzer**: New specialized tool for analyzing Hebrew insurance terms documents
+- **RTL Text Pattern Recognition**: Enhanced pattern matching for Hebrew text structures and insurance terminology
+- **Document Structure Analysis**: Comprehensive analysis of Hebrew document sections, policy identification, and coverage terms
+- **Financial Terms Extraction**: Specialized extraction of Hebrew financial and premium information
+- **Contact Information Parsing**: Enhanced extraction of Hebrew contact details and company information
+
+### 🛠️ **Development Tools**
+- **analyze_hebrew_doc.py**: New development tool for analyzing Hebrew insurance document structures
+- **Enhanced Pattern Matching**: Improved regex patterns for Hebrew insurance terminology
+- **Coverage Type Analysis**: Detailed analysis of Hebrew medical and insurance coverage terms
+- **Policy Identification**: Enhanced detection of Hebrew policy numbers and dates
+
+### 🧹 **Repository Maintenance**
+- **Clean Repository Structure**: Removed development test files while preserving essential analysis tools
+- **Enhanced .gitignore**: Improved patterns to maintain clean production environment
+- **Version Synchronization**: Updated all version references across documentation and package files
+
 ## [2.0.0] - 2024-01-15 - **🚀 AI Revolution Release**
 
 ### 🚀 **Major Features Added**

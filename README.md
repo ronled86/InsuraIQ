@@ -1,6 +1,6 @@
 # InsuraIQ - AI-Powered Insurance Policy Analysis Platform
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](#)
+[![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)](#)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://python.org)
 [![React](https://img.shields.io/badge/react-18.0+-blue.svg)](https://reactjs.org)
 [![FastAPI](https://img.shields.io/badge/fastapi-0.104+-red.svg)](https://fastapi.tiangolo.com)
@@ -11,7 +11,7 @@
 InsuraIQ is a cutting-edge platform that transforms how insurance policies are analyzed, compared, and managed. Powered by **OpenAI GPT-4o-mini** and advanced natural language processing, it extracts **100+ parameters** from complex insurance documents in multiple languages.
 
 ---
-**Current Version:** v2.0.0 - **Major AI Enhancement Release**  
+**Current Version:** v2.0.1 - **Hebrew Document Analysis Enhancement**  
 **Security:** ✅ Production-ready with comprehensive security measures  
 **AI Integration:** ✅ OpenAI GPT-4o-mini for intelligent document analysis
 
