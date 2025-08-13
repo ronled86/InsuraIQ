@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Path
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List
+import os
+from pathlib import Path as PathLib
 from ..database import get_db
 from .. import models, schemas
 from ..core.auth_security import require_auth
 from ..services import nlp, pdf_import
+from ..services.compare import comparison_service
 
 router = APIRouter(prefix="/policies", tags=["policies"])
 
@@ -49,6 +53,8 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
     import tempfile
     import os
     import logging
+    import shutil
+    from pathlib import Path
     
     logger = logging.getLogger(__name__)
     logger.info(f"PDF import started for file: {file.filename}")
@@ -57,11 +63,13 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
         raise HTTPException(status_code=400, detail="Please upload a PDF file")
     
     tmp_path = None
+    pdf_file_path = None
     try:
         # Read file content
         logger.info("Reading file content...")
         payload = await file.read()
-        logger.info(f"File content read, size: {len(payload)} bytes")
+        file_size = len(payload)
+        logger.info(f"File content read, size: {file_size} bytes")
         
         # Create a temporary file path that works on Windows
         logger.info("Creating temporary file...")
@@ -107,17 +115,40 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
             data['end_date'] = "2024-12-31"
         
         logger.info("Creating policy record...")
-        # Create policy record
+        # Create policy record first to get ID
         p = models.Policy(**data, user_id=user['id'])
         db.add(p)
         db.commit()
         db.refresh(p)
         
-        logger.info(f"PDF imported successfully, policy ID: {p.id}")
+        # Save PDF file to permanent location
+        upload_dir = Path(__file__).parent.parent.parent / "uploads"
+        upload_dir.mkdir(exist_ok=True)
+        
+        # Create a unique filename using policy ID and original filename
+        safe_filename = f"policy_{p.id}_{file.filename}"
+        pdf_file_path = upload_dir / safe_filename
+        
+        # Copy the PDF file to permanent storage
+        shutil.copy2(tmp_path, pdf_file_path)
+        
+        # Update policy with PDF file information
+        p.original_filename = file.filename
+        p.pdf_file_path = str(pdf_file_path)
+        p.pdf_file_size = file_size
+        db.commit()
+        
+        logger.info(f"PDF imported successfully, policy ID: {p.id}, PDF stored at: {pdf_file_path}")
         return {"success": True, "created_id": p.id, "extracted": data, "message": "PDF imported successfully"}
         
     except Exception as e:
         logger.error(f"Error processing PDF: {str(e)}", exc_info=True)
+        # Clean up PDF file if it was created but policy creation failed
+        if pdf_file_path and os.path.exists(pdf_file_path):
+            try:
+                os.unlink(pdf_file_path)
+            except:
+                pass
         raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
     finally:
         # Clean up temporary file
@@ -127,3 +158,74 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
                 logger.info(f"Temporary file {tmp_path} cleaned up")
             except Exception as e:
                 logger.warning(f"Failed to clean up temporary file {tmp_path}: {str(e)}")
+
+@router.get("/{policy_id}/pdf")
+async def get_policy_pdf(policy_id: int, db: Session = Depends(get_db), user=Depends(require_auth)):
+    """Serve the PDF file for a specific policy"""
+    policy = db.query(models.Policy).filter(
+        models.Policy.id == policy_id,
+        models.Policy.user_id == user['id']
+    ).first()
+    
+    if not policy:
+        raise HTTPException(status_code=404, detail="Policy not found")
+    
+    if not policy.pdf_file_path or not os.path.exists(policy.pdf_file_path):
+        raise HTTPException(status_code=404, detail="PDF file not found")
+    
+    return FileResponse(
+        path=policy.pdf_file_path,
+        media_type='application/pdf',
+        filename=policy.original_filename or f"policy_{policy_id}.pdf"
+    )
+
+@router.post("/compare")
+async def compare_policies(policy_ids: List[int], db: Session = Depends(get_db), user=Depends(require_auth)):
+    """Compare multiple policies with AI-powered analysis"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        logger.info(f"Comparing policies: {policy_ids} for user: {user['id']}")
+        
+        if len(policy_ids) < 2:
+            raise HTTPException(status_code=400, detail="At least 2 policies are required for comparison")
+        
+        # Use the enhanced comparison service
+        comparison_result = comparison_service.compare_policies(db, policy_ids, user['id'])
+        
+        # Save comparison to history
+        history_record = models.CompareHistory(
+            user_id=user['id'],
+            policy_ids_csv=','.join(map(str, policy_ids)),
+            result_json=str(comparison_result)
+        )
+        db.add(history_record)
+        db.commit()
+        
+        logger.info(f"Comparison completed successfully for policies: {policy_ids}")
+        return comparison_result
+        
+    except ValueError as e:
+        logger.error(f"Comparison validation error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Comparison failed: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Comparison failed: {str(e)}")
+
+@router.get("/compare/history")
+async def get_comparison_history(db: Session = Depends(get_db), user=Depends(require_auth)):
+    """Get user's comparison history"""
+    history = db.query(models.CompareHistory).filter(
+        models.CompareHistory.user_id == user['id']
+    ).order_by(models.CompareHistory.created_at.desc()).limit(10).all()
+    
+    return [
+        {
+            "id": h.id,
+            "policy_ids": h.policy_ids_csv.split(','),
+            "created_at": h.created_at,
+            "result_summary": str(h.result_json)[:200] + "..." if len(str(h.result_json)) > 200 else str(h.result_json)
+        }
+        for h in history
+    ]

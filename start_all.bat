@@ -26,9 +26,65 @@ if %errorlevel% neq 0 (
 echo Prerequisites check passed!
 echo.
 
+REM =============================================
+REM CLEANUP EXISTING PROCESSES
+REM =============================================
+echo Stopping any existing InsuraIQ processes...
+
+REM Kill any existing terminal windows with InsuraIQ titles
+echo Closing existing InsuraIQ terminal windows...
+tasklist /FI "WINDOWTITLE eq InsuraIQ Backend (FastAPI)" >nul 2>&1 && (
+    echo Found existing backend window, closing it...
+    taskkill /FI "WINDOWTITLE eq InsuraIQ Backend (FastAPI)" /F >nul 2>&1
+)
+tasklist /FI "WINDOWTITLE eq InsuraIQ Frontend (React)" >nul 2>&1 && (
+    echo Found existing frontend window, closing it...
+    taskkill /FI "WINDOWTITLE eq InsuraIQ Frontend (React)" /F >nul 2>&1
+)
+
+REM Kill processes by port (more reliable)
+echo Checking for processes on ports 8000 and 5173...
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING') do (
+    if not "%%a"=="0" (
+        echo Stopping process on port 8000 (PID: %%a)
+        taskkill /PID %%a /F >nul 2>&1
+    )
+)
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5173 ^| findstr LISTENING') do (
+    if not "%%a"=="0" (
+        echo Stopping process on port 5173 (PID: %%a)
+        taskkill /PID %%a /F >nul 2>&1
+    )
+)
+
+REM Kill any uvicorn processes (backend)
+echo Checking for uvicorn processes...
+for /f "tokens=2" %%a in ('tasklist /FI "IMAGENAME eq python.exe" /FO CSV ^| findstr uvicorn') do (
+    echo Stopping uvicorn process (PID: %%a)
+    taskkill /PID %%a /F >nul 2>&1
+)
+
+REM Kill any node processes running from our frontend directory
+echo Checking for node processes in frontend directory...
+wmic process where "name='node.exe' and commandline like '%%InsuraIQ%%frontend%%'" get processid /format:value 2>nul | findstr "ProcessId" > temp_pids.txt
+for /f "tokens=2 delims==" %%a in (temp_pids.txt) do (
+    if not "%%a"=="" (
+        echo Stopping frontend node process (PID: %%a)
+        taskkill /PID %%a /F >nul 2>&1
+    )
+)
+del temp_pids.txt >nul 2>&1
+
+echo Waiting for processes to fully terminate...
+timeout /t 3 /nobreak >nul
+
+REM =============================================
+REM START NEW PROCESSES
+REM =============================================
+
 REM Start backend in a new terminal window
 echo Starting FastAPI backend server...
-start "InsuraIQ Backend (FastAPI)" cmd /k "cd /d %~dp0backend && echo Starting FastAPI backend... && powershell -ExecutionPolicy Bypass -NoExit -Command .\run_local_dev.ps1"
+start "InsuraIQ Backend (FastAPI)" cmd /k "cd /d %~dp0backend && echo Starting FastAPI backend... && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload --no-use-colors"
 
 REM Wait a moment for backend to start
 timeout /t 3 /nobreak >nul
