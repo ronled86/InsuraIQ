@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     # External integrations
     INSURER_API_BASE: str = Field(default="", description="Optional external insurer aggregator base URL")
     INSURER_API_KEY: str = Field(default="", description="Optional API key")
+    OPENAI_API_KEY: str = Field(default="", description="OpenAI API key for AI analysis")
     
     # Development mode
     LOCAL_DEV: bool = Field(default=False, description="If true, relax auth and allow SQLite DB override")

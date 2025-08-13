@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { PDFViewer } from './PDFViewer'
+import PolicyRow from './PolicyRow'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
 const supabaseAnon = import.meta.env.VITE_SUPABASE_ANON_KEY as string
@@ -35,6 +37,8 @@ function useSession() {
 type Policy = {
   id: number; insurer: string; product_type: string; premium_monthly: number; deductible: number; coverage_limit: number; owner_name: string;
   policy_number: string; start_date: string; end_date: string; notes?: string; active: boolean; user_id: string;
+  pdf_file_path?: string; pdf_file_size?: number; original_filename?: string; policy_language?: string;
+  coverage_details?: string; terms_and_conditions?: string; extraction_confidence?: number;
 }
 
 export function App() {
@@ -135,6 +139,7 @@ function Dashboard({ session }: { session: any }) {
   const [pdf, setPdf] = useState<File | null>(null)
   const [quotes, setQuotes] = useState<any[]>([])
   const [uploadStatus, setUploadStatus] = useState<string>('')
+  const [viewingPdf, setViewingPdf] = useState<{policyId: number, filename: string} | null>(null)
 
   async function api(path: string, init?: RequestInit) {
     const r = await fetch(`${apiBase}${path}`, { ...(init||{}), headers: { ...(init?.headers||{}), Authorization: `Bearer ${token}` } })
@@ -194,8 +199,20 @@ function Dashboard({ session }: { session: any }) {
     }
   }
   async function compare() {
-    const data = await api('/advisor/compare', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ policy_ids: selected }) })
-    setResult(data); setTab('compare')
+    try {
+      setUploadStatus('Comparing policies...')
+      const data = await api('/policies/compare', { 
+        method: 'POST', 
+        headers: {'Content-Type':'application/json'}, 
+        body: JSON.stringify(selected) 
+      })
+      setResult(data); 
+      setTab('compare')
+      setUploadStatus('')
+    } catch (error) {
+      setUploadStatus(`Error comparing policies: ${error}`)
+      setTimeout(() => setUploadStatus(''), 5000)
+    }
   }
   async function loadRecs() { const data = await api('/advisor/recommendations'); setRecs(data) }
   async function loadQuotes() {
@@ -280,17 +297,6 @@ function Dashboard({ session }: { session: any }) {
             <table className="table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Insurer</th>
-                  <th>Type</th>
-                  <th>Premium</th>
-                  <th>Deductible</th>
-                  <th>Coverage Limit</th>
-                  <th>Policy Owner</th>
-                  <th>Policy Number</th>
-                  <th>Start Date</th>
-                  <th>End Date</th>
-                  <th>Status</th>
                   <th>
                     <input 
                       type="checkbox" 
@@ -305,11 +311,28 @@ function Dashboard({ session }: { session: any }) {
                       title="Select/Deselect All"
                     />
                   </th>
+                  <th>ID</th>
+                  <th>Policy Name / Owner</th>
+                  <th>Insurer</th>
+                  <th>Type</th>
+                  <th>Policy Number</th>
+                  <th>Coverage Period</th>
+                  <th>Premium</th>
+                  <th>PDF</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {policies.map(p => (
-                  <EditableRow key={p.id} p={p} onSave={saveRow} onDelete={()=>deleteRow(p.id)} onSelect={checked=> setSelected(s => checked ? [...s, p.id] : s.filter(x=>x!==p.id)) } />
+                  <PolicyRow 
+                    key={p.id} 
+                    policy={p} 
+                    isSelected={selected.includes(p.id)}
+                    onSelect={(id: number) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])}
+                    onViewPdf={(policyId: number, filename: string) => setViewingPdf({ policyId, filename })}
+                    onEdit={saveRow}
+                    onDelete={()=>deleteRow(p.id)}
+                  />
                 ))}
               </tbody>
             </table>
@@ -336,20 +359,31 @@ function Dashboard({ session }: { session: any }) {
                     )
                   }
                 </span>
+              </div>
+              
+              <div className="bulk-actions">
+                {selected.length >= 2 && (
+                  <button 
+                    className="btn btn-primary btn-lg"
+                    onClick={compare}
+                    disabled={uploadStatus.includes('Comparing')}
+                  >
+                    {uploadStatus.includes('Comparing') ? 'Comparing...' : `🔍 Compare (${selected.length})`}
+                  </button>
+                )}
+                
                 {selected.length > 0 && (
-                  <div className="bulk-actions">
-                    <button 
-                      className="btn btn-danger"
-                      onClick={() => {
-                        if (confirm(`Are you sure you want to delete ${selected.length} selected policies?`)) {
-                          selected.forEach(id => deleteRow(id))
-                          setSelected([])
-                        }
-                      }}
-                    >
-                      Delete Selected ({selected.length})
-                    </button>
-                  </div>
+                  <button 
+                    className="btn btn-danger"
+                    onClick={() => {
+                      if (confirm(`Are you sure you want to delete ${selected.length} selected policies?`)) {
+                        selected.forEach(id => deleteRow(id))
+                        setSelected([])
+                      }
+                    }}
+                  >
+                    Delete Selected ({selected.length})
+                  </button>
                 )}
               </div>
             </div>
@@ -372,27 +406,147 @@ function Dashboard({ session }: { session: any }) {
               {result ? (
                 <div className="mt-4">
                   <div className="alert alert-info">
-                    {result.summary}
+                    <h4>Comparison Summary</h4>
+                    {typeof result.summary === 'string' ? (
+                      <p>{result.summary}</p>
+                    ) : (
+                      <div>
+                        {result.summary?.overview && <p>{result.summary.overview}</p>}
+                        {result.summary?.total_policies && (
+                          <p><strong>Total Policies:</strong> {result.summary.total_policies}</p>
+                        )}
+                        {result.summary?.policy_types && result.summary.policy_types.length > 0 && (
+                          <p><strong>Policy Types:</strong> {result.summary.policy_types.join(', ')}</p>
+                        )}
+                        {result.summary?.insurers && result.summary.insurers.length > 0 && (
+                          <p><strong>Insurers:</strong> {result.summary.insurers.join(', ')}</p>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="table-container">
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th>ID</th><th>Insurer</th><th>Type</th><th>Premium</th>
-                          <th>Deductible</th><th>Coverage</th><th>Value Rating</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.table?.map((r:any)=>(
-                          <tr key={r.id}>
-                            <td>{r.id}</td><td>{r.insurer}</td><td>{r.product_type}</td>
-                            <td>${r.premium_monthly}</td><td>${r.deductible}</td>
-                            <td>${r.coverage_limit}</td><td>{r.coverage_per_shekel}</td>
+                  
+                  {result.policies && (
+                    <div className="table-container">
+                      <table className="table comparison-table">
+                        <thead>
+                          <tr>
+                            <th>Parameter</th>
+                            {result.policies.map((policy: any) => (
+                              <th key={policy.id} className="policy-column">
+                                <div className="policy-header">
+                                  <div className="policy-title">Policy #{policy.id}</div>
+                                  <div className="policy-subtitle">{policy.insurer}</div>
+                                </div>
+                              </th>
+                            ))}
                           </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="parameter-label"><strong>Policy Number</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value">{policy.policy_number || 'N/A'}</td>
+                            ))}
+                          </tr>
+                          <tr>
+                            <td className="parameter-label"><strong>Product Type</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value">
+                                <span className={`type-badge type-${policy.product_type?.toLowerCase().replace(/\s+/g, '-')}`}>
+                                  {policy.product_type || 'N/A'}
+                                </span>
+                              </td>
+                            ))}
+                          </tr>
+                          <tr>
+                            <td className="parameter-label"><strong>Owner</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value">{policy.owner_name || 'N/A'}</td>
+                            ))}
+                          </tr>
+                          <tr className="financial-row">
+                            <td className="parameter-label"><strong>Monthly Premium</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value financial-value">
+                                <span className="amount">${policy.premium_monthly || 0}</span>
+                                <span className="period">/month</span>
+                              </td>
+                            ))}
+                          </tr>
+                          <tr className="financial-row">
+                            <td className="parameter-label"><strong>Deductible</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value financial-value">
+                                <span className="amount">${policy.deductible || 0}</span>
+                              </td>
+                            ))}
+                          </tr>
+                          <tr className="financial-row">
+                            <td className="parameter-label"><strong>Coverage Limit</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value financial-value">
+                                <span className="amount">${policy.coverage_limit || 0}</span>
+                              </td>
+                            ))}
+                          </tr>
+                          <tr>
+                            <td className="parameter-label"><strong>Start Date</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value">
+                                {policy.start_date ? new Date(policy.start_date).toLocaleDateString() : 'N/A'}
+                              </td>
+                            ))}
+                          </tr>
+                          <tr>
+                            <td className="parameter-label"><strong>End Date</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value">
+                                {policy.end_date ? new Date(policy.end_date).toLocaleDateString() : 'N/A'}
+                              </td>
+                            ))}
+                          </tr>
+                          <tr>
+                            <td className="parameter-label"><strong>Language</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value">
+                                <span className="language-indicator">
+                                  {policy.policy_language === 'he' ? '🇮🇱 Hebrew' : 
+                                   policy.policy_language === 'en' ? '🇺🇸 English' : 
+                                   policy.policy_language || '🌐 Unknown'}
+                                </span>
+                              </td>
+                            ))}
+                          </tr>
+                          <tr>
+                            <td className="parameter-label"><strong>PDF File</strong></td>
+                            {result.policies.map((policy: any) => (
+                              <td key={policy.id} className="policy-value">
+                                {policy.original_filename ? (
+                                  <span className="file-indicator">📄 {policy.original_filename}</span>
+                                ) : (
+                                  <span className="no-file">No file</span>
+                                )}
+                              </td>
+                            ))}
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  
+                  {result.recommendations && result.recommendations.length > 0 && (
+                    <div className="mt-4">
+                      <h4>Recommendations</h4>
+                      <ul className="list-group">
+                        {result.recommendations.map((rec: any, index: number) => (
+                          <li key={index} className="list-group-item">
+                            <strong>{rec.type}:</strong> {rec.description}
+                            {rec.priority && <span className="badge badge-primary ml-2">{rec.priority}</span>}
+                          </li>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      </ul>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="alert alert-warning mt-4">
@@ -476,11 +630,28 @@ function Dashboard({ session }: { session: any }) {
           </div>
         </section>
       )}
+      
+      {/* PDF Viewer Modal */}
+      {viewingPdf && (
+        <PDFViewer 
+          policyId={viewingPdf.policyId}
+          filename={viewingPdf.filename}
+          apiBase={apiBase}
+          token={token}
+          onClose={() => setViewingPdf(null)}
+        />
+      )}
     </div>
   )
 }
 
-function EditableRow({ p, onSave, onDelete, onSelect }: { p: Policy, onSave: (p: Policy)=>void, onDelete: ()=>void, onSelect:(checked:boolean)=>void }) {
+function EditableRow({ p, onSave, onDelete, onSelect, onViewPdf }: { 
+  p: Policy, 
+  onSave: (p: Policy)=>void, 
+  onDelete: ()=>void, 
+  onSelect:(checked:boolean)=>void,
+  onViewPdf: (policyId: number, filename: string) => void
+}) {
   const [row, setRow] = useState<Policy>(p)
   const [editingField, setEditingField] = useState<string | null>(null)
   
@@ -620,6 +791,21 @@ function EditableRow({ p, onSave, onDelete, onSelect }: { p: Policy, onSave: (p:
           type="date"
           formatter={formatDate}
         />
+      </td>
+      <td>
+        {p.pdf_file_path ? (
+          <button 
+            className="view-pdf-btn"
+            onClick={() => onViewPdf(p.id, p.original_filename || `policy_${p.id}.pdf`)}
+            title="View PDF document"
+          >
+            📄 View PDF
+          </button>
+        ) : (
+          <span className="pdf-indicator pdf-unavailable" title="No PDF available">
+            📄 No PDF
+          </span>
+        )}
       </td>
       <td>
         {editingField && (

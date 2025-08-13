@@ -51,3 +51,6 @@ venv/
 *.tmp
 *.temp
 .cache/
+
+# Example files
+*.pdf

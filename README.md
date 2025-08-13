@@ -1,389 +1,171 @@
-# InsuraIQ - Insurance Management Platform
+# InsuraIQ - AI-Powered Insurance Policy Analysis Platform
 
-A modern insurance policy management platform built with FastAPI (backend) and React (frontend), designed to help users manage their insurance policies, compare coverage, and get recommendations.
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](#)
+[![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://python.org)
+[![React](https://img.shields.io/badge/react-18.0+-blue.svg)](https://reactjs.org)
+[![FastAPI](https://img.shields.io/badge/fastapi-0.104+-red.svg)](https://fastapi.tiangolo.com)
+[![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+
+## 🚀 **Revolutionary AI-Enhanced Insurance Policy Management**
+
+InsuraIQ is a cutting-edge platform that transforms how insurance policies are analyzed, compared, and managed. Powered by **OpenAI GPT-4o-mini** and advanced natural language processing, it extracts **100+ parameters** from complex insurance documents in multiple languages.
 
 ---
-**Current Version:** v1.0.0  
-See the `VERSION` file for the latest release version.
+**Current Version:** v2.0.0 - **Major AI Enhancement Release**  
+**Security:** ✅ Production-ready with comprehensive security measures  
+**AI Integration:** ✅ OpenAI GPT-4o-mini for intelligent document analysis
 
-## 📈 Recent Updates (v1.0.0)
+## 🎯 **Key Features**
 
-### ✅ **PDF Import Functionality - FULLY OPERATIONAL**
-- **Fixed**: 500 Internal Server Error during PDF uploads
-- **Fixed**: Connection reset issues in frontend
-- **Fixed**: FileNotFoundError with Unix paths on Windows systems
-- **Added**: Comprehensive error logging and debugging
-- **Added**: Robust fallback handling for unreadable PDFs
-- **Added**: Enhanced regex patterns for policy data extraction
-- **Improved**: File handling with Windows-compatible temporary file paths
+### 🧠 **AI-Powered Document Analysis**
+- **OpenAI GPT-4o-mini Integration** for semantic understanding of insurance documents
+- **Hybrid AI + Regex Engine** with intelligent fallback for maximum reliability
+- **100+ Parameter Extraction** across all major insurance types (auto, home, health, life, business)
+- **Multi-language Support** with Hebrew RTL text handling and English processing
+- **Confidence Scoring** provides extraction quality assessment for user confidence
 
-### 🔧 **System Improvements**
-- **Added**: Comprehensive startup scripts (`start_all.bat`, `start_all.ps1`)
-- **Added**: PowerShell execution policy bypass for seamless startup
-- **Improved**: Documentation with troubleshooting guides
-- **Enhanced**: Backend stability and error handling
+### 📊 **Advanced Policy Comparison**
+- **Side-by-side Parameter Analysis** with detailed comparison tables
+- **Coverage Gap Detection** using AI recommendations
+- **Financial Analysis** comparing premiums, deductibles, and coverage limits
+- **Interactive Comparison Interface** with expandable parameter categories
+- **Export Capabilities** for reports and analysis documentation
 
-### 🚀 **Ready for Production**
-- All API endpoints tested and working
-- PDF import tested with real insurance documents
-- Frontend and backend integration verified
-- Database operations confirmed stable
+### 📄 **Intelligent PDF Processing**
+- **Multi-method Text Extraction** (PDFMiner → PyPDF2 → OCR fallback)
+- **AI-Enhanced Content Understanding** for complex policy document layouts
+- **Built-in PDF Viewer** with zoom, navigation, and annotation support
+- **Secure File Storage** with user authorization and access controls
+- **Batch Processing** for multiple document import and analysis
 
+### 🌐 **Modern User Interface**
+- **Responsive React Frontend** with TypeScript for type safety
+- **Hebrew RTL Support** for international insurance markets
+- **Real-time Progress Indicators** with confidence scores and extraction status
+- **Mobile-Optimized Design** for access across all device types
+- **Professional Dashboard** with comprehensive policy portfolio management
 
-## 🏗️ Architecture
+### 🔒 **Enterprise Security**
+- **Environment-based Configuration** with no hardcoded secrets
+- **API Key Protection** with secure environment variable management
+- **Input Validation** and sanitization for all user inputs
+- **File Upload Security** with type validation and size limits
+- **Authentication Middleware** for API endpoint protection
 
-- **Backend**: FastAPI with SQLAlchemy, PostgreSQL/SQLite
-- **Frontend**: React with TypeScript, Vite
-- **Deployment**: Docker Compose with Caddy reverse proxy
-- **Authentication**: Supabase JWT (configurable)
+## 🏗️ **System Architecture**
 
-## 📋 Prerequisites
-
-### For Docker Deployment (Recommended)
-- Docker Desktop
-- Docker Compose
-
-### For Local Development
-- Python 3.11+
-- Node.js 20+
-- (Optional) PostgreSQL 16+ if not using SQLite
-
-## 🚀 Quick Start
-
-### Option 1: One-Click Startup (Recommended for Local Development)
-
-**Windows Batch Script:**
-```cmd
-start_all.bat
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   React Frontend│    │   FastAPI Backend│    │   AI Processing │
+│   (TypeScript)  │◄──►│    (Python)      │◄──►│   (OpenAI GPT)  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                        │                        │
+         ▼                        ▼                        ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   PDF Viewer    │    │   SQLite DB      │    │   NLP Engine    │
+│   (PDF.js)      │    │   (SQLAlchemy)   │    │   (Regex+AI)    │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
-**Windows PowerShell Script (with health checks):**
-```powershell
+## 🚀 **Quick Start Guide**
+
+### 📋 **Prerequisites**
+- **Python 3.8+** (recommended 3.11+)
+- **Node.js 16+** (recommended 18+)
+- **OpenAI API Key** (required for AI-enhanced analysis)
+
+### 🔧 **Installation**
+
+#### 1. **Clone the Repository**
+```bash
+git clone https://github.com/yourusername/InsuraIQ.git
+cd InsuraIQ
+```
+
+#### 2. **Backend Setup**
+```bash
+cd backend
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+# macOS/Linux  
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+#### 3. **🔒 Secure Environment Configuration**
+```bash
+# Copy the secure environment template
+cp .env.example .env
+
+# ⚠️ IMPORTANT: Edit .env and add your actual API keys
+# NEVER commit the .env file to version control!
+```
+
+**Required Environment Variables:**
+```bash
+# .env file (keep this secure!)
+OPENAI_API_KEY=your_actual_openai_api_key_here
+LOCAL_DEV=true
+SQLALCHEMY_DATABASE_URL=sqlite:///./local_dev.db
+```
+
+#### 4. **Database Initialization**
+```bash
+alembic upgrade head
+```
+
+#### 5. **Frontend Setup**
+```bash
+cd ../frontend
+npm install
+```
+
+#### 6. **🚀 Launch Application**
+
+**Option A: Automated Startup (Recommended)**
+```bash
+# Windows
+start_all.bat
+
+# Or use PowerShell with health checks
 .\start_all.ps1
 ```
 
-Both scripts will:
-- Check for Python and Node.js prerequisites
-- Start the FastAPI backend on http://localhost:8000
-- Start the React frontend on http://localhost:5173
-- Provide status updates and health checks
+**Option B: Manual Startup**
+```bash
+# Terminal 1: Backend
+cd backend
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload --no-use-colors
 
-### Option 2: Docker Deployment
-
-1. **Clone and configure**:
-   ```bash
-   git clone <repository-url>
-   cd InsuraIQ
-   cp backend/.env.example .env
-   # Edit .env with your Supabase credentials (optional)
-   ```
-
-2. **Start the stack**:
-   ```bash
-   docker compose up --build -d
-   ```
-
-3. **Access the application**:
-   - Web App: https://localhost (or http://localhost)
-   - API Documentation: https://localhost/api/docs
-   - API JSON: https://localhost/api/openapi.json
-
-4. **Stop the stack**:
-   ```bash
-   docker compose down -v
-   ```
-
-### Option 3: Manual Local Development (Advanced)
-
-#### Backend Setup
-
-1. **Navigate and setup**:
-   ```powershell
-   cd backend
-   Copy-Item .env.local-example .env
-   # Edit .env if needed
-   ```
-
-2. **Run the backend**:
-   ```powershell
-   .\run_local_dev.ps1
-   ```
-
-   This script will:
-   - Create a Python virtual environment
-   - Install dependencies (lightweight set for SQLite)
-   - Initialize SQLite database
-   - Start Uvicorn server on http://localhost:8000
-
-#### Frontend Setup
-
-In a separate terminal:
-
-```powershell
+# Terminal 2: Frontend
 cd frontend
-npm install
 npm run dev
 ```
 
-Frontend will be available at http://localhost:5173
+#### 7. **🌐 Access Application**
+- **Frontend Interface**: http://localhost:5173
+- **Backend API**: http://127.0.0.1:8000
+- **API Documentation**: http://127.0.0.1:8000/docs
+- **OpenAPI Spec**: http://127.0.0.1:8000/openapi.json
 
-## 📦 Dependencies
+---
 
-### Backend Dependencies
+## ⚠️ **Important Security Notice**
 
-#### Core Dependencies (requirements.txt)
-```
-fastapi==0.111.0              # Web framework
-uvicorn[standard]==0.30.1     # ASGI server
-pydantic==2.8.2               # Data validation
-pydantic-settings==2.4.0      # Settings management
-SQLAlchemy==2.0.32            # ORM
-alembic==1.13.2               # Database migrations
-jinja2==3.1.4                 # Template engine
-python-multipart==0.0.9       # Form data parsing
-httpx==0.27.0                 # HTTP client
-python-jose[cryptography]==3.3.0  # JWT handling
-```
+**🔒 This application handles sensitive financial and personal information. Always:**
+- Keep your API keys secure and never commit them to version control
+- Use HTTPS in production environments
+- Regularly update dependencies for security patches
+- Follow the security checklist before deployment
+- Monitor for unusual activity and implement logging
 
-#### Database Dependencies
-```
-psycopg2-binary==2.9.9        # PostgreSQL adapter (production)
-# SQLite is built into Python (development)
-```
+---
 
-#### Optional Dependencies
-```
-pdfminer.six==20240706        # PDF text extraction (✅ **Working**)
-pytesseract==0.3.13           # OCR (requires Tesseract binary)
-Pillow==10.4.0                # Image processing for OCR
-```
+**🏆 Built with ❤️ for the Insurance Industry**
 
-**PDF Import Features:**
-- ✅ Automatic text extraction from PDF files
-- ✅ Pattern-based data extraction for policy information
-- ✅ Fallback data handling for unreadable PDFs
-- ✅ OCR support (when Tesseract is installed)
-- ✅ Robust error handling and logging
+*Transform your insurance policy management with cutting-edge AI-powered analysis*
 
-#### Local Development (requirements-local.txt)
-Lightweight subset excluding:
-- `psycopg2-binary` (uses SQLite instead)
-- `pytesseract` (OCR disabled for simpler setup)
-
-### Frontend Dependencies
-
-#### Core Dependencies (package.json)
-```json
-{
-  "dependencies": {
-    "@supabase/supabase-js": "^2.45.5",  // Auth client
-    "react": "^18.3.1",                  // UI framework
-    "react-dom": "^18.3.1"              // DOM rendering
-  },
-  "devDependencies": {
-    "@types/react": "^18.3.4",          // TypeScript types
-    "@types/react-dom": "^18.3.0",      // TypeScript types
-    "@vitejs/plugin-react": "^4.0.0",   // Vite React plugin
-    "typescript": "^5.5.4",             // TypeScript compiler
-    "vite": "^5.4.1"                    // Build tool
-  }
-}
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-#### Backend (.env)
-```bash
-# Development mode
-LOCAL_DEV=true                                    # Enables auth bypass and SQLite
-
-# Database
-SQLALCHEMY_DATABASE_URL=sqlite:///./local_dev.db  # Local SQLite
-# SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://user:pass@host:5432/db  # Production
-
-# Authentication (optional for local dev)
-SUPABASE_URL=https://your-project.supabase.co
-API_ISSUER=https://your-project.supabase.co/auth/v1
-API_AUDIENCE=                                     # Optional
-SUPABASE_JWKS_URL=                               # Optional override
-
-# API Configuration
-RATE_LIMIT_PER_MINUTE=240
-BASE_PATH=/api
-
-# External Integrations (optional)
-INSURER_API_BASE=
-INSURER_API_KEY=
-```
-
-#### Docker Environment (.env for docker-compose)
-```bash
-# Same as backend .env, but typically with PostgreSQL URL:
-SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/insurance
-```
-
-## 🏃‍♂️ Development Workflow
-
-### Backend Development
-
-1. **Activate environment**:
-   ```powershell
-   cd backend
-   . .venv/Scripts/Activate.ps1
-   ```
-
-2. **Install new dependencies**:
-   ```powershell
-   pip install package-name
-   pip freeze > requirements.txt  # Update requirements
-   ```
-
-3. **Database migrations**:
-   ```powershell
-   # Create migration
-   alembic revision --autogenerate -m "description"
-   
-   # Apply migrations
-   alembic upgrade head
-   ```
-
-4. **Run tests** (when available):
-   ```powershell
-   pytest
-   ```
-
-### Frontend Development
-
-1. **Install new dependencies**:
-   ```bash
-   npm install package-name
-   ```
-
-2. **Build for production**:
-   ```bash
-   npm run build
-   ```
-
-3. **Type checking**:
-   ```bash
-   npx tsc --noEmit
-   ```
-
-## 🔗 API Endpoints
-
-### Policies
-- `GET /api/policies/` - List user policies
-- `POST /api/policies/` - Create policy
-- `PUT /api/policies/{id}` - Update policy
-- `DELETE /api/policies/{id}` - Delete policy
-- `POST /api/policies/upload` - Upload CSV files
-- `POST /api/policies/import/pdf` - Import policy data from PDF files (✅ **Working**)
-
-### Advisory
-- `POST /api/advisor/compare` - Compare policies
-- `GET /api/advisor/recommendations` - Get recommendations
-- `GET /api/advisor/compare_history` - View comparison history
-- `GET /api/advisor/quotes_demo` - Demo external quotes
-
-### Portfolio
-- `GET /api/portfolio/summary` - Portfolio overview
-- `GET /api/portfolio/analytics` - Analytics data
-
-## 🐳 Docker Configuration
-
-### Services
-- **db**: PostgreSQL 16 with health checks
-- **backend**: FastAPI application
-- **frontend**: React build artifacts
-- **caddy**: Reverse proxy with automatic HTTPS
-
-### Volumes
-- `db_data`: PostgreSQL data persistence
-- `frontend_build`: Shared static assets between frontend and Caddy
-
-## 🔒 Authentication
-
-### Local Development
-- Auth is bypassed when `LOCAL_DEV=true`
-- Stub user provided: `{"id": "local-user", "email": "local@example.com"}`
-
-### Production
-- JWT validation via Supabase
-- JWKS endpoint: `{SUPABASE_URL}/auth/v1/keys`
-- Configurable audience and issuer validation
-
-## 🛠️ Troubleshooting
-
-### Common Issues
-
-#### PDF Import Issues (✅ **Resolved**)
-- **✅ Fixed**: 500 Internal Server Error during PDF upload
-- **✅ Fixed**: Connection reset errors in frontend
-- **✅ Fixed**: FileNotFoundError with Unix paths on Windows
-- **Solution**: Enhanced file handling with proper Windows temporary file paths
-- **Solution**: Improved error handling with graceful fallbacks
-- **Solution**: Added comprehensive logging for debugging
-
-#### Backend won't start
-- **Dependency errors**: Use `requirements-local.txt` for simpler local setup
-- **Database errors**: Ensure SQLite file permissions or PostgreSQL connectivity
-- **Port conflicts**: Change port in `uvicorn` command
-
-#### Frontend build issues
-- **Missing dependencies**: Run `npm install`
-- **TypeScript errors**: Check `tsconfig.json` configuration
-- **Vite plugin issues**: Ensure `@vitejs/plugin-react` is installed
-
-#### Docker issues
-- **Build failures**: Try `docker compose build --no-cache`
-- **Port conflicts**: Modify ports in `docker-compose.yml`
-- **Volume issues**: Run `docker compose down -v` to reset
-
-### Logs and Debugging
-
-#### Local Development
-- Backend logs: Check `backend/backend-dev.log`
-- Frontend logs: Check browser console
-
-#### Docker
-```bash
-# View service logs
-docker compose logs backend
-docker compose logs frontend
-docker compose logs caddy
-
-# Follow logs
-docker compose logs -f backend
-```
-
-
-## 📚 Documentation
-
-- [Backend Guide](backend/README.md): Detailed backend development documentation
-- [Frontend Guide](frontend/README.md): Frontend development and deployment guide
-- [Examples](examples/README.md): Sample policy files for testing import functionality
-
-**API Documentation:** To access interactive API docs:
-1. Start the backend server: `cd backend && .\run_local_dev.ps1`
-2. Visit `http://localhost:8000/api/docs` in your browser
-
-## 📝 License
-
-See [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make changes with tests
-4. Submit a pull request
-
-## 📞 Support
-
-For issues and questions:
-1. Check this README
-2. Review error logs
-3. Check the [API documentation](http://localhost:8000/api/docs) when running
-4. Open an issue in the repository
+**Version 2.0.0** - The AI Revolution in Insurance Technology
