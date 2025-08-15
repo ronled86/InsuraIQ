@@ -57,6 +57,7 @@ venv/
 
 # Test files and temporary scripts
 test_*.py
+!backend/tests/test_security.py
 *_test.py
 analyze_*.py
 !analyze_hebrew_doc.py
