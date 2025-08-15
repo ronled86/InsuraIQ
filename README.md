@@ -67,7 +67,27 @@ InsuraIQ is a cutting-edge platform that transforms how insurance policies are a
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
-## 🚀 **Quick Start Guide**
+## � Project Structure
+
+This project is now organized with a clean structure for better maintainability:
+
+```
+InsuraIQ/
+├── 📁 backend/           # FastAPI backend services
+├── 📁 frontend/          # React frontend application  
+├── 📁 docs/              # Documentation and guides
+├── 📁 tests/             # Integration and end-to-end tests
+├── 📁 scripts/           # Utility scripts and tools
+├── 📁 examples/          # Sample files and configurations
+├── 📁 infra/             # Infrastructure and deployment
+├── �🚀 start_all.bat      # Quick start for Windows
+├── 🚀 start_all.ps1      # Quick start for PowerShell
+└── 📄 README.md          # This file
+```
+
+For detailed structure information, see [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md).
+
+## 🚀 Quick Start
 
 ### 📋 **Prerequisites**
 - **Python 3.8+** (recommended 3.11+)

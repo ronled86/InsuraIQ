@@ -8,6 +8,8 @@ import re
 import tempfile
 import shutil
 import logging
+import uuid
+from datetime import datetime
 from pathlib import Path as PathLib
 from ..database import get_db
 from .. import models, schemas
@@ -49,9 +51,33 @@ def check_file_size(payload: bytes) -> None:
     """Check if file size is within limits"""
     if len(payload) > MAX_FILE_SIZE:
         raise ValidationException(
-            f"File too large. Maximum size is {settings.MAX_FILE_SIZE_MB}MB",
+            f"File size {len(payload)/1024/1024:.1f}MB exceeds maximum allowed size of {settings.MAX_FILE_SIZE_MB}MB",
             field="file_size"
         )
+
+def generate_unique_policy_number(db: Session, base_filename: str) -> str:
+    """Generate a unique policy number based on filename"""
+    # Clean filename for policy number
+    clean_filename = re.sub(r'[^\w\-_.]', '', base_filename[:10])
+    timestamp = datetime.now().strftime("%y%m%d%H%M")
+    
+    # Try different variations until we find a unique one
+    for attempt in range(100):  # Max 100 attempts
+        if attempt == 0:
+            policy_number = f"PDF-{clean_filename}-{timestamp}"
+        else:
+            policy_number = f"PDF-{clean_filename}-{timestamp}-{attempt:02d}"
+        
+        # Check if this policy number already exists
+        existing = db.query(models.Policy).filter(
+            models.Policy.policy_number == policy_number
+        ).first()
+        
+        if not existing:
+            return policy_number
+    
+    # Fallback to UUID if all attempts failed
+    return f"PDF-{uuid.uuid4().hex[:12]}"
 
 router = APIRouter(prefix="/policies", tags=["policies"])
 
@@ -172,7 +198,7 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
                 "owner_name": f"PDF Import ({file.filename})",
                 "insurer": "Unknown",
                 "product_type": "general", 
-                "policy_number": f"PDF-{file.filename[:15]}",
+                "policy_number": generate_unique_policy_number(db, file.filename),
                 "start_date": "2024-01-01",
                 "end_date": "2024-12-31",
                 "premium_monthly": 0.0,
@@ -189,7 +215,7 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
         if not data.get('product_type'):
             data['product_type'] = "general"
         if not data.get('policy_number'):
-            data['policy_number'] = f"PDF-{file.filename[:10]}"
+            data['policy_number'] = generate_unique_policy_number(db, file.filename)
         if not data.get('start_date'):
             data['start_date'] = "2024-01-01"
         if not data.get('end_date'):
@@ -197,10 +223,21 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
         
         logger.info("Creating policy record...")
         # Create policy record first to get ID
-        p = models.Policy(**data, user_id=user['id'])
-        db.add(p)
-        db.commit()
-        db.refresh(p)
+        try:
+            p = models.Policy(**data, user_id=user['id'])
+            db.add(p)
+            db.commit()
+            db.refresh(p)
+        except IntegrityError as e:
+            db.rollback()
+            logger.warning(f"Integrity error when creating policy, generating new policy number: {str(e)}")
+            
+            # If we get a constraint violation, try with a new unique policy number
+            data['policy_number'] = generate_unique_policy_number(db, file.filename + "_retry")
+            p = models.Policy(**data, user_id=user['id'])
+            db.add(p)
+            db.commit()
+            db.refresh(p)
         
         # Save PDF file to permanent location
         upload_dir = Path(__file__).parent.parent.parent / "uploads"
