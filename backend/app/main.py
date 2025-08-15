@@ -1,11 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
 import colorama
 from colorama import Fore, Style
 from .database import engine, Base
-from .routers import policies as policies_router, portfolio as portfolio_router, quotes as quotes_router
+from .routers import policies as policies_router, portfolio as portfolio_router, quotes as quotes_router, admin as admin_router
 from .core.middleware import RateLimitMiddleware
+from .core.security_middleware import SecurityHeadersMiddleware, RequestValidationMiddleware
+from .core.exceptions import (
+    global_exception_handler, 
+    insuraiq_exception_handler, 
+    InsuraIQException
+)
 from .core.settings import settings
 
 # Initialize colorama for proper Windows console colors
@@ -65,15 +73,29 @@ setup_logging()
 # Alembic is used for migrations, do not call Base.metadata.create_all here in production
 app = FastAPI(title="Insurance Advisor V6", root_path=settings.BASE_PATH)
 
+# Add exception handlers
+app.add_exception_handler(InsuraIQException, insuraiq_exception_handler)
+app.add_exception_handler(RequestValidationError, global_exception_handler)
+app.add_exception_handler(StarletteHTTPException, global_exception_handler)
+app.add_exception_handler(Exception, global_exception_handler)
+
+# Add security middleware (order matters - add from outermost to innermost)
+app.add_middleware(SecurityHeadersMiddleware, enforce_https=not settings.LOCAL_DEV)
+app.add_middleware(RequestValidationMiddleware)
 app.add_middleware(RateLimitMiddleware)
+
+# Configure CORS - restrict origins for security
+allowed_origins = settings.get_allowed_origins()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 app.include_router(policies_router.router)
 app.include_router(portfolio_router.router)
 app.include_router(quotes_router.router)
+app.include_router(admin_router.router)

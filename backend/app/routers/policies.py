@@ -1,31 +1,102 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Path
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from typing import List, Optional, Dict, Any
 import os
+import re
+import tempfile
+import shutil
+import logging
 from pathlib import Path as PathLib
 from ..database import get_db
 from .. import models, schemas
 from ..core.auth_security import require_auth
+from ..core.settings import settings
+from ..core.sanitization import input_sanitizer
+from ..core.exceptions import (
+    NotFoundException, 
+    ValidationException, 
+    FileProcessingException,
+    DatabaseException,
+    handle_database_error,
+    handle_exceptions
+)
 from ..services import nlp, pdf_import
 from ..services.compare import comparison_service
+
+# Security constants
+MAX_FILE_SIZE = settings.MAX_FILE_SIZE_MB * 1024 * 1024
+ALLOWED_FILE_EXTENSIONS = {'.pdf', '.csv'}
+
+def validate_file_upload(file: UploadFile) -> None:
+    """Validate uploaded file for security"""
+    if not file.filename:
+        raise ValidationException("No filename provided", field="filename")
+    
+    # Check file extension
+    file_ext = os.path.splitext(file.filename.lower())[1]
+    if file_ext not in ALLOWED_FILE_EXTENSIONS:
+        raise ValidationException(
+            f"File type {file_ext} not allowed. Only {', '.join(ALLOWED_FILE_EXTENSIONS)} are permitted",
+            field="file_type"
+        )
+    
+    # Sanitize filename to prevent path traversal
+    file.filename = input_sanitizer.sanitize_filename(file.filename)
+
+def check_file_size(payload: bytes) -> None:
+    """Check if file size is within limits"""
+    if len(payload) > MAX_FILE_SIZE:
+        raise ValidationException(
+            f"File too large. Maximum size is {settings.MAX_FILE_SIZE_MB}MB",
+            field="file_size"
+        )
 
 router = APIRouter(prefix="/policies", tags=["policies"])
 
 @router.post("/", response_model=schemas.PolicyOut)
-def create_policy(policy: schemas.PolicyCreate, db: Session = Depends(get_db), user=Depends(require_auth)):
-    p = models.Policy(**policy.model_dump(), user_id=user['id'])
-    db.add(p); db.commit(); db.refresh(p); return p
+@handle_exceptions()
+async def create_policy(
+    policy: schemas.PolicyCreate, 
+    db: Session = Depends(get_db), 
+    user: Dict[str, Any] = Depends(require_auth)
+) -> models.Policy:
+    """Create a new policy with comprehensive error handling"""
+    try:
+        # Sanitize input data
+        sanitized_data = input_sanitizer.sanitize_policy_data(policy.model_dump())
+        p = models.Policy(**sanitized_data, user_id=user['id'])
+        db.add(p)
+        db.commit()
+        db.refresh(p)
+        return p
+    except IntegrityError as e:
+        db.rollback()
+        raise handle_database_error(e, "create_policy")
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise DatabaseException("Failed to create policy", operation="create_policy")
 
 @router.get("/", response_model=List[schemas.PolicyOut])
-def list_policies(db: Session = Depends(get_db), user=Depends(require_auth)):
-    return db.query(models.Policy).filter(models.Policy.user_id==user['id']).all()
+@handle_exceptions()
+async def list_policies(
+    db: Session = Depends(get_db), 
+    user: Dict[str, Any] = Depends(require_auth)
+) -> List[models.Policy]:
+    """List all policies for the authenticated user"""
+    try:
+        return db.query(models.Policy).filter(models.Policy.user_id == user['id']).all()
+    except SQLAlchemyError as e:
+        raise DatabaseException("Failed to retrieve policies", operation="list_policies")
 
 @router.put("/{policy_id}", response_model=schemas.PolicyOut)
 def update_policy(policy_id: int = Path(...), patch: schemas.PolicyUpdate = None, db: Session = Depends(get_db), user=Depends(require_auth)):
     p = db.query(models.Policy).filter(models.Policy.id==policy_id, models.Policy.user_id==user['id']).first()
     if not p: raise HTTPException(status_code=404, detail="Policy not found")
-    data = patch.model_dump(exclude_unset=True)
+    
+    # Sanitize update data
+    data = input_sanitizer.sanitize_policy_data(patch.model_dump(exclude_unset=True))
     for k, v in data.items():
         setattr(p, k, v)
     db.add(p); db.commit(); db.refresh(p); return p
@@ -38,9 +109,14 @@ def delete_policy(policy_id: int, db: Session = Depends(get_db), user=Depends(re
 
 @router.post("/upload")
 async def upload_policies(file: UploadFile = File(...), db: Session = Depends(get_db), user=Depends(require_auth)):
+    validate_file_upload(file)
+    
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a CSV file")
+    
     content = (await file.read()).decode("utf-8").splitlines()
+    check_file_size(content.encode())
+    
     rows = nlp.parse_csv(content)
     created = []
     for r in rows:
@@ -59,15 +135,20 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
     logger = logging.getLogger(__name__)
     logger.info(f"PDF import started for file: {file.filename}")
     
+    # Validate file upload
+    validate_file_upload(file)
+    
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Please upload a PDF file")
     
     tmp_path = None
     pdf_file_path = None
     try:
-        # Read file content
+        # Read file content and validate size
         logger.info("Reading file content...")
         payload = await file.read()
+        check_file_size(payload)
+        
         file_size = len(payload)
         logger.info(f"File content read, size: {file_size} bytes")
         
@@ -141,6 +222,9 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
         logger.info(f"PDF imported successfully, policy ID: {p.id}, PDF stored at: {pdf_file_path}")
         return {"success": True, "created_id": p.id, "extracted": data, "message": "PDF imported successfully"}
         
+    except HTTPException:
+        # Re-raise HTTP exceptions (validation errors)
+        raise
     except Exception as e:
         logger.error(f"Error processing PDF: {str(e)}", exc_info=True)
         # Clean up PDF file if it was created but policy creation failed
@@ -149,7 +233,13 @@ async def import_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
                 os.unlink(pdf_file_path)
             except:
                 pass
-        raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+        # Generic error message for security
+        from ..core.settings import settings
+        if settings.LOCAL_DEV:
+            detail = f"Error processing PDF: {str(e)}"
+        else:
+            detail = "Error processing PDF file. Please try again or contact support."
+        raise HTTPException(status_code=500, detail=detail)
     finally:
         # Clean up temporary file
         if tmp_path:

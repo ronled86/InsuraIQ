@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = Field(default=240, description="Global simple limit per IP")
     BASE_PATH: str = Field(default="/api", description="Mount path behind reverse proxy")
     
+    # Security settings
+    MAX_FILE_SIZE_MB: int = Field(default=10, description="Maximum file upload size in MB")
+    ALLOWED_ORIGINS: str = Field(default="http://localhost:5173", description="Comma-separated list of allowed CORS origins")
+    
     # Database configuration
     SQLALCHEMY_DATABASE_URL: str = Field(default="postgresql+psycopg2://postgres:postgres@db:5432/insurance")
     
@@ -24,5 +28,11 @@ class Settings(BaseSettings):
     LOCAL_DEV: bool = Field(default=False, description="If true, relax auth and allow SQLite DB override")
     
     model_config = {"env_file": ".env"}
+    
+    def get_allowed_origins(self) -> list[str]:
+        """Parse allowed origins from string"""
+        if self.LOCAL_DEV:
+            return ["http://localhost:5173", "http://127.0.0.1:5173"]
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
 
 settings = Settings()

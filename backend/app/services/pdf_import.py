@@ -3,6 +3,7 @@ from pdfminer.high_level import extract_text
 import re
 import json
 from .nlp import policy_analyzer
+from ..core.sanitization import input_sanitizer
 try:
     from PIL import Image  # type: ignore
     import pytesseract  # type: ignore
@@ -294,6 +295,9 @@ def parse_pdf_to_policy_fields(file_path: str, raw_bytes: bytes | None = None, o
         "pdf_file_path": file_path,
         "notes": "Imported from PDF with AI analysis"
     })
+    
+    # Sanitize all extracted data for security
+    data = input_sanitizer.sanitize_policy_data(data)
     
     logger.info(f"Final extracted data with confidence {data['extraction_confidence']}: {data}")
     return data

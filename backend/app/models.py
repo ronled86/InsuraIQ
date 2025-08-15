@@ -1,10 +1,8 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text
-from .database import Base
-from datetime import datetime
-
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text, JSON
+from sqlalchemy.ext.declarative import DeclarativeMeta
 from .database import Base
 from datetime import datetime
+from typing import Optional, Dict, Any, Union
 
 class Policy(Base):
     __tablename__ = "policies"

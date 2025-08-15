@@ -10,8 +10,10 @@ import { pdfjs } from 'react-pdf'
 const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
 
-// Debug log to verify version matching
-console.log('PDF.js version:', pdfjs.version)
-console.log('Worker source:', workerSrc)
+// Only log in development mode
+if (import.meta.env.DEV) {
+  console.log('PDF.js version:', pdfjs.version)
+  console.log('Worker source:', workerSrc)
+}
 
 createRoot(document.getElementById('root')!).render(<App />)

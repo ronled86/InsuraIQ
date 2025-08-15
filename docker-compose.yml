@@ -4,7 +4,9 @@ services:
     environment:
       - POSTGRES_DB=insurance
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      # ⚠️ SECURITY: Use strong password in production!
+      # Set POSTGRES_PASSWORD via environment variable or secrets
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -24,9 +26,11 @@ services:
       - API_AUDIENCE=${API_AUDIENCE}
       - RATE_LIMIT_PER_MINUTE=240
       - BASE_PATH=/api
-      - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/insurance
+      # ⚠️ SECURITY: Use environment variable with strong password in production
+      - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/insurance
       - INSURER_API_BASE=${INSURER_API_BASE}
       - INSURER_API_KEY=${INSURER_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/openapi.json"]
       interval: 10s
