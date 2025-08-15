@@ -9,6 +9,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
 import traceback
 import uuid
+import asyncio
+import functools
 from datetime import datetime
 from enum import Enum
 from ..core.settings import settings
@@ -311,9 +313,13 @@ async def insuraiq_exception_handler(request: Request, exc: InsuraIQException) -
 def handle_exceptions(error_code: ErrorCode = ErrorCode.INTERNAL_SERVER_ERROR):
     """Decorator to automatically handle exceptions in route handlers"""
     def decorator(func):
+        @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             try:
-                return await func(*args, **kwargs)
+                if asyncio.iscoroutinefunction(func):
+                    return await func(*args, **kwargs)
+                else:
+                    return func(*args, **kwargs)
             except InsuraIQException:
                 raise  # Re-raise our custom exceptions
             except Exception as e:
