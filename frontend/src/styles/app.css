@@ -899,6 +899,38 @@ button {
   text-align: center;
 }
 
+/* Continuous mode container styling */
+.pdf-continuous-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+.pdf-continuous-view {
+  /* Force scroll to start at top */
+  scroll-behavior: auto !important;
+}
+
+.pdf-continuous-view:not(.user-scrolled) {
+  /* Prevent auto-centering behavior */
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+}
+
+.pdf-continuous-container .react-pdf__Page {
+  margin-bottom: 10px;
+  border: 1px solid var(--gray-300);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-continuous-container .react-pdf__Page:first-child {
+  margin-top: 0 !important;
+  scroll-margin-top: 0 !important;
+}
+
 .pdf-error .alert {
   text-align: left;
   max-width: 500px;

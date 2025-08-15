@@ -22,9 +22,11 @@ export function PDFViewer({ policyId, filename, apiBase, token, onClose }: PDFVi
   const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'single' | 'continuous'>('continuous')
   const [pageInput, setPageInput] = useState('')
+  const [userHasScrolled, setUserHasScrolled] = useState(false)
   
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<(HTMLDivElement | null)[]>([])
+  const initialLoadRef = useRef(true)
 
   const pdfUrl = `${apiBase}/policies/${policyId}/pdf`
 
@@ -42,42 +44,57 @@ export function PDFViewer({ policyId, filename, apiBase, token, onClose }: PDFVi
     setError(null)
     setScale(1.0)
     setPageInput('')
+    setUserHasScrolled(false)
+    initialLoadRef.current = true
     
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0
+      scrollContainerRef.current.scrollLeft = 0
     }
   }, [policyId]) // Reset when policy changes
 
   // Intersection Observer to track which page is currently in view
   useEffect(() => {
-    if (!numPages || viewMode !== 'continuous') return
+    if (!numPages || viewMode !== 'continuous' || !userHasScrolled) return
 
-    // Add a small delay to prevent interference with initial page setting
-    const timer = setTimeout(() => {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const pageIndex = parseInt(entry.target.getAttribute('data-page') || '1')
-              setCurrentPage(pageIndex)
-            }
-          })
-        },
-        { 
-          threshold: 0.5,
-          root: scrollContainerRef.current
-        }
-      )
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const pageIndex = parseInt(entry.target.getAttribute('data-page') || '1')
+            setCurrentPage(pageIndex)
+          }
+        })
+      },
+      { 
+        threshold: 0.5,
+        root: scrollContainerRef.current
+      }
+    )
 
-      pageRefs.current.forEach((ref) => {
-        if (ref) observer.observe(ref)
-      })
+    pageRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref)
+    })
 
-      return () => observer.disconnect()
-    }, 500) // Wait 500ms before starting to observe
+    return () => observer.disconnect()
+  }, [numPages, viewMode, userHasScrolled])
 
-    return () => clearTimeout(timer)
-  }, [numPages, viewMode])
+  // Track user scroll events
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const handleScroll = () => {
+      if (initialLoadRef.current) {
+        initialLoadRef.current = false
+        return
+      }
+      setUserHasScrolled(true)
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Keyboard navigation
   useEffect(() => {
@@ -178,21 +195,21 @@ export function PDFViewer({ policyId, filename, apiBase, token, onClose }: PDFVi
   // Smooth scroll to specific page
   const scrollToPage = useCallback((pageNum: number) => {
     if (viewMode === 'continuous') {
-      if (pageRefs.current[pageNum - 1]) {
-        pageRefs.current[pageNum - 1]?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        })
-      } else {
-        // If page ref isn't ready yet, scroll to top
+      if (pageNum === 1) {
+        // For page 1, always scroll to top
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollTop = 0
         }
+      } else if (pageRefs.current[pageNum - 1]) {
+        pageRefs.current[pageNum - 1]?.scrollIntoView({ 
+          behavior: userHasScrolled ? 'smooth' : 'auto', 
+          block: 'start' 
+        })
       }
     } else {
       setCurrentPage(pageNum)
     }
-  }, [viewMode])
+  }, [viewMode, userHasScrolled])
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages)
@@ -202,20 +219,74 @@ export function PDFViewer({ policyId, filename, apiBase, token, onClose }: PDFVi
     // Initialize page refs array
     pageRefs.current = new Array(numPages).fill(null)
     
-    // Force scroll to top and first page after a brief delay to ensure DOM is ready
-    setTimeout(() => {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTop = 0
-        scrollContainerRef.current.scrollLeft = 0
-      }
-      setCurrentPage(1) // Set again to be sure
+    // Reset scroll tracking first
+    setUserHasScrolled(false)
+    initialLoadRef.current = true
+    
+    // Only handle scroll positioning for continuous mode
+    if (viewMode === 'continuous' && scrollContainerRef.current) {
+      // Force immediate scroll to top
+      scrollContainerRef.current.scrollTop = 0
+      scrollContainerRef.current.scrollLeft = 0
       
-      // In continuous mode, try to scroll to first page
-      if (viewMode === 'continuous') {
-        setTimeout(() => scrollToPage(1), 200)
-      }
-    }, 100)
+      // Use requestAnimationFrame for smoother control
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = 0
+        }
+      })
+    }
   }
+
+  // Handle scroll tracking for intersection observer
+  useEffect(() => {
+    if (!scrollContainerRef.current || viewMode !== 'continuous' || !numPages || userHasScrolled) return
+
+    const container = scrollContainerRef.current
+    const options = {
+      root: container,
+      rootMargin: '0px',
+      threshold: 0.5
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      // Only update current page if user has scrolled
+      if (userHasScrolled) {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const pageElement = entry.target as HTMLElement
+            const pageNum = parseInt(pageElement.getAttribute('data-page') || '1', 10)
+            setCurrentPage(pageNum)
+          }
+        })
+      }
+    }, options)
+
+    // Observe all page elements
+    pageRefs.current.forEach((pageRef) => {
+      if (pageRef) observer.observe(pageRef)
+    })
+
+    return () => observer.disconnect()
+  }, [viewMode, numPages, userHasScrolled])
+
+  // Simple continuous mode scroll reset - only when document loads
+  useEffect(() => {
+    if (numPages && viewMode === 'continuous' && !userHasScrolled && scrollContainerRef.current) {
+      // Set scroll position to top immediately
+      scrollContainerRef.current.scrollTop = 0
+      
+      // Also ensure after first page renders
+      const handleFirstPageRender = () => {
+        if (scrollContainerRef.current && !userHasScrolled) {
+          scrollContainerRef.current.scrollTop = 0
+        }
+      }
+      
+      // Wait for first page to render, then reset position
+      setTimeout(handleFirstPageRender, 100)
+    }
+  }, [numPages, viewMode])
 
   function onDocumentLoadError(error: Error) {
     console.error('Error loading PDF:', error)
@@ -372,6 +443,16 @@ export function PDFViewer({ policyId, filename, apiBase, token, onClose }: PDFVi
         <div 
           className={`pdf-viewer-content ${viewMode === 'continuous' ? 'pdf-continuous-view' : 'pdf-single-view'}`}
           ref={scrollContainerRef}
+          onScroll={() => {
+            if (!userHasScrolled) {
+              setUserHasScrolled(true)
+            }
+          }}
+          style={{ 
+            scrollBehavior: userHasScrolled ? 'smooth' : 'auto',
+            // Ensure container starts at top for continuous mode
+            ...(viewMode === 'continuous' && !userHasScrolled ? { scrollTop: 0 } : {})
+          }}
         >
           {loading && (
             <div className="pdf-loading">
@@ -400,24 +481,34 @@ export function PDFViewer({ policyId, filename, apiBase, token, onClose }: PDFVi
           >
             {viewMode === 'continuous' ? (
               // Continuous view - render all pages
-              numPages && Array.from(new Array(numPages), (el, index) => (
-                <div
-                  key={`page_${index + 1}`}
-                  ref={(ref) => (pageRefs.current[index] = ref)}
-                  data-page={index + 1}
-                  className="pdf-page-container"
-                >
-                  <div className="pdf-page-number">
-                    Page {index + 1} of {numPages}
+              <div className="pdf-continuous-container">
+                {numPages && Array.from(new Array(numPages), (el, index) => (
+                  <div
+                    key={`page_${index + 1}`}
+                    ref={(ref) => {
+                      pageRefs.current[index] = ref
+                    }}
+                    data-page={index + 1}
+                    className="pdf-page-container"
+                  >
+                    <div className="pdf-page-number">
+                      Page {index + 1} of {numPages}
+                    </div>
+                    <Page 
+                      pageNumber={index + 1} 
+                      scale={scale}
+                      loading=""
+                      error=""
+                      onLoadSuccess={() => {
+                        // Only reset scroll for the first page and only once
+                        if (index === 0 && !userHasScrolled && scrollContainerRef.current) {
+                          scrollContainerRef.current.scrollTop = 0
+                        }
+                      }}
+                    />
                   </div>
-                  <Page 
-                    pageNumber={index + 1} 
-                    scale={scale}
-                    loading=""
-                    error=""
-                  />
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
               // Single page view - render current page only
               <div className="pdf-page-container">
